@@ -53,6 +53,6 @@
   (let [machine (atom interpreter/machine)]
     (js/requestAnimationFrame
      (fn cb []
-       (draw-machine (swap! machine interpreter/machine-step))
+       (draw-machine (swap! machine #(last (take 100 (iterate interpreter/machine-step %)))))
        (js/requestAnimationFrame cb)))))
 
