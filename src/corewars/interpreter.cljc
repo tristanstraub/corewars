@@ -1,7 +1,9 @@
 (ns corewars.interpreter
   (:require [corewars.parser :as parser]
             [corewars.examples :as examples]
-            #?(:cljs [cljs.reader])))
+            #?(:cljs [cljs.reader])
+            [corewars.emitter :as emitter]
+            [corewars.decoder :as decoder]))
 
 (defn parse-integer
   [v]
@@ -60,9 +62,10 @@
 
 (defn machine-step
   [machine]
-  (machine-eval machine (get-in machine [:instructions (:ptr machine)])))
+  (machine-eval machine (decoder/disassemble-1 (get-in machine [:memory (:ptr machine)]))))
 
 (def machine
-  {:memory       (vec (repeat 8000 0))
-   :instructions (parser/parse examples/dwarf)
+  {:memory       (vec (first (partition 4096 4096 (repeat 0) (emitter/assemble (parser/parse examples/dwarf)))))
    :ptr          0})
+
+

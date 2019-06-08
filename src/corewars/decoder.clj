@@ -24,19 +24,24 @@
       reverse
       vec))
 
-(defn decode
+(defn disassemble-mnemonic
+  [mnemonic]
+  (case mnemonic
+    0 :dat
+    1 :mov
+    2 :add
+    3 :sub
+    4 :jmp
+    5 :jmz
+    6 :djz
+    7 :cmp))
+
+(defn disassemble-1
   [field]
   (let [[mnemonic op1-type op2-type op1-value op2-value] (unpack-1 field)]
-    [(case mnemonic
-       0 :dat
-       1 :mov
-       2 :add
-       3 :sub
-       4 :jmp
-       5 :jmz
-       6 :djz
-       7 :cmp)
-     (when op1-type
+    [(disassemble-mnemonic mnemonic)
+     (when (and op1-type
+                (not (#{:jmp :dat} (disassemble-mnemonic mnemonic))))
        [(case op1-type
           0 :immediate
           1 :relative
@@ -51,6 +56,6 @@
           nil nil)
         op2-value])]))
 
-(defn unpack
+(defn disassemble
   [fields]
-  (map decode fields))
+  (map disassemble-1 fields))

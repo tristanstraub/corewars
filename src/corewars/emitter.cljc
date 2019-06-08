@@ -1,19 +1,11 @@
 (ns corewars.emitter)
 
-(defn parse-integer
-  [v]
-  (int #?(:clj (read-string v)
-          :cljs (cljs.reader/read-string v))))
-
 (defn bit-shift-field
   ([shift-register bits value]
    (bit-or (bit-shift-left shift-register bits)
            (bit-and value (dec (bit-shift-left 1 bits))))))
 
-(defmulti machine-emit (fn [[mnemonic & _]]
-                         mnemonic))
-
-(defn machine-emit-default
+(defn machine-emit
   [[mnemonic [op1-type op1-value :as op1] [op2-type op2-value :as op2]]]
   (-> 0
       (bit-shift-field 4 (case mnemonic
@@ -38,24 +30,12 @@
                              :indirect  2)
                            0))
       (bit-shift-field 12 (if op1
-                            (parse-integer (str op1-value))
+                            op1-value
                             0))
       (bit-shift-field 12 (if op2
-                            (parse-integer (str op2-value))
+                            op2-value
                             0))))
 
-(defmethod machine-emit :default
-  [instruction]
-  (machine-emit-default instruction))
-
-(defmethod machine-emit :dat
-  [[mnemonic op-value]]
-  (machine-emit-default [mnemonic nil [:immediate op-value]]))
-
-(defmethod machine-emit :jmp
-  [[mnemonic op]]
-  (machine-emit-default [mnemonic nil op]))
-
-(defn pack
+(defn assemble
   [instructions]
   (map machine-emit instructions))
