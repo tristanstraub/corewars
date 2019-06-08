@@ -1,9 +1,5 @@
 (ns corewars.interpreter
-  (:require [corewars.parser :as parser]
-            [corewars.examples :as examples]
-            #?(:cljs [cljs.reader])
-            [corewars.emitter :as emitter]
-            [corewars.decoder :as decoder]))
+  (:require [corewars.decoder :as decoder]))
 
 (defn machine-next
   [machine]
@@ -66,17 +62,16 @@
 
 (defn machine-step
   [machine]
-  (-> machine
-      (machine-get (:ptr machine))
-      (decoder/disassemble-1)
-      (->> (machine-eval machine))))
+  (as-> machine machine
+    (assoc machine :ptr (first (:ptrs machine)))
+    (machine-eval machine (-> machine
+                              (machine-get (:ptr machine))
+                              (decoder/disassemble-1)))
+    (update machine :ptrs (fn [ptrs]
+                            (let [[_ & ptrs] ptrs]
+                              (conj (vec ptrs) (:ptr machine)))))))
 
-(def machine
-  {:memory  (vec (first (partition 4096 4096 (repeat 0) (emitter/assemble (parser/parse examples/imp)))))
-   :ptr     0})
-
-
-#_(last (iterate machine-step machine))
+#_(last (take 2 (iterate machine-step machine)))
 
 
 

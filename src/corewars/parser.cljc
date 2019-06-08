@@ -1,5 +1,6 @@
 (ns corewars.parser
-  (:require [instaparse.core :as insta]))
+  (:require [instaparse.core :as insta]
+            #?(:cljs [cljs.reader])))
 
 (def parser
   (insta/parser "<S>           = instructions;
