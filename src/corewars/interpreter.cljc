@@ -9,10 +9,17 @@
   [machine]
   (update machine :ptr (fn [ptr] (mod (inc ptr) (count (:memory machine))))))
 
+(def *machine-store-hook*
+  (atom nil))
+
 (defn machine-store
   [machine value addr]
   (let [size (count (:memory machine))]
-    (assoc-in machine [:memory (mod addr size)] value)))
+    (-> machine
+        (cond->
+            @*machine-store-hook*
+          (@*machine-store-hook* (mod addr size) value))
+        (update :memory assoc (mod addr size) value))))
 
 (defn machine-get
   [machine addr]
@@ -65,8 +72,9 @@
       (->> (machine-eval machine))))
 
 (def machine
-  {:memory       (vec (first (partition 4096 4096 (repeat 0) (emitter/assemble (parser/parse examples/imp)))))
-   :ptr          0})
+  {:memory  (vec (first (partition 4096 4096 (repeat 0) (emitter/assemble (parser/parse examples/imp)))))
+   :ptr     0})
+
 
 #_(last (iterate machine-step machine))
 
