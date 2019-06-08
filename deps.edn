@@ -1,5 +1,6 @@
 {:deps {instaparse                      {:mvn/version "1.4.10"}
         impi                            {:mvn/version "0.0.10"}
+        rum                             {:mvn/version "0.11.3"}
         
         com.bhauman/figwheel-main       {:mvn/version "0.2.0"}
         com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}

@@ -1,12 +1,14 @@
 (ns corewars.controlpanel
   (:require [impi.core :as impi]
             [corewars.interpreter :as interpreter]
-            [corewars.examples :as examples]))
+            [corewars.examples :as examples]
+            [rum.core :as rum]
+            [goog.dom :as dom]))
 
 (enable-console-print!)
 
 (defn draw-machine
-  [machine]
+  [el machine]
   (let [nx      100
         ny      80
         cw      10
@@ -15,7 +17,7 @@
         ptrs    (into {} (mapv vector (:ptrs machine) (range)))]
     (impi/mount
      :example-scene
-     {:pixi/renderer {:pixi.renderer/size [1000 800]}
+     {:pixi/renderer {:pixi.renderer/size [1000 410]}
       :pixi/stage    {:impi/key                :performance
                       :pixi.object/type        :pixi.object.type/container
                       :pixi.container/children
@@ -44,21 +46,32 @@
                                                                {:pixi.line/width 1
                                                                 :pixi.line/color 0x22FF11
                                                                 :pixi.line/alpha 0.5}})))}]}}
-     (.getElementById js/document "app"))))
+     el)))
 
+(def impi
+  {:after-render (fn [state]
+                   (draw-machine (js/ReactDOM.findDOMNode (:rum/react-component state))
+                                 @(first (:rum/args state)))                   
+                   state)})
 
+(rum/defc frame < rum/reactive impi
+  [machine]
+  (rum/react machine)
+  [:div])
 
 (defonce animated
-  (let [machine    (atom examples/machine)]
+  (let [machine (atom examples/machine)]
     (reset! interpreter/*machine-store-hook* (fn [machine addr value]
                                                (update machine :journal conj addr)))
 
-    
+    (rum/mount (frame machine) (dom/getElement "app"))
+
     (js/requestAnimationFrame
      (fn cb []
        (try
-         (draw-machine (swap! machine #(interpreter/machine-step (assoc % :journal nil))))
+         (swap! machine #(interpreter/machine-step (assoc % :journal nil)))
          (js/requestAnimationFrame cb)
          (catch js/Error e
            (.log js/console e)))))))
+
 
