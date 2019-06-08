@@ -52,7 +52,7 @@
       (machine-next)))
 
 (defmethod machine-eval :jmp
-  [machine [_ op]]
+  [machine [_ _ op]]
   (assoc machine :ptr (machine-addr machine op)))
 
 (defn machine-step
