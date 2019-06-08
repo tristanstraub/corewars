@@ -1,6 +1,5 @@
 (ns corewars.interpreter
-  (:require [instaparse.core :as insta]
-            #?(:cljs [cljs.reader])))
+  (:require [corewars.assembler :as assembler]))
 
 (defn parse-integer
   [v]
@@ -61,25 +60,6 @@
   [machine]
   (machine-eval machine (get-in machine [:instructions (:ptr machine)])))
 
-(def parser
-  (insta/parser "<S>           = instructions;
-<instructions> = instruction | (instruction <ws>+ instructions*)
-ws          = #'[ \n\t]';
-<number>      = #'[-]?[0-9]+';
-<instruction> = <ws>* (dat | add | mov | jmp) <ws>*;
-dat         = <'DAT'> <ws>+ number;
-add         = <'ADD'> <ws>+ op <ws>+ op;
-mov         = <'MOV'> <ws>+ op <ws>+ op;
-jmp         = <'JMP'> <ws>+ op;
-<op>          = immediate | relative | indirect;
-relative    = number;
-immediate   = <'#'> number;
-indirect    = <'@'> number;
-"))
-
-(defn parse
-  [input]
-  (insta/parse parser input))
 
 (def dwarf
   "DAT 0
@@ -92,5 +72,5 @@ indirect    = <'@'> number;
 
 (def machine
   {:memory       (vec (repeat 8000 0))
-   :instructions (parse dwarf)
+   :instructions (assembler/parse dwarf)
    :ptr          0})
