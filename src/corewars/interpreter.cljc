@@ -1,5 +1,11 @@
-(ns corewars.parse
-  (:require [instaparse.core :as insta]))
+(ns corewars.interpreter
+  (:require [instaparse.core :as insta]
+            #?(:cljs [cljs.reader])))
+
+(defn parse-integer
+  [v]
+  (int #?(:clj (read-string v)
+          :cljs (cljs.reader/read-string v))))
 
 (defmulti machine-eval (fn [machine [mnemonic & ops]] mnemonic))
 
@@ -21,7 +27,7 @@
 
 (defn machine-addr
   [machine [addr-type offset]]
-  (let [base (+ (:ptr machine) (Integer/parseInt offset))]
+  (let [base (+ (:ptr machine) (parse-integer (str offset)))]
     (case addr-type
       :relative base
       :indirect (+ base (machine-get machine base)))))
@@ -29,7 +35,7 @@
 (defn machine-load
   [machine [value-type value :as op]]
   (case value-type
-    :immediate (Integer/parseInt (str value))
+    :immediate (parse-integer (str value))
     (:relative :indirect) (machine-get machine (machine-addr machine op))))
 
 (defmethod machine-eval :add
@@ -80,6 +86,9 @@ indirect    = <'@'> number;
   ADD #4 -1
   MOV #3 @-2
   JMP -2")
+
+(def imp
+  "MOV 0 1")
 
 (def machine
   {:memory       (vec (repeat 8000 0))

@@ -1,1 +1,10 @@
-{:deps {instaparse {:mvn/version "1.4.10"}}}
+{:deps {instaparse                      {:mvn/version "1.4.10"}
+        impi                            {:mvn/version "0.0.10"}
+        
+        com.bhauman/figwheel-main       {:mvn/version "0.2.0"}
+        com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}
+ ;; setup some development paths
+ :paths ["src" "target" "resources"]
+ ;; setup a helpful alias to start the build
+ :aliases {:build-dev {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}}}
+
