@@ -1,12 +1,11 @@
 (ns corewars.interpreter
-  (:require [corewars.assembler :as assembler]))
+  (:require [corewars.parser :as parser]
+            #?(:cljs [cljs.reader])))
 
 (defn parse-integer
   [v]
   (int #?(:clj (read-string v)
           :cljs (cljs.reader/read-string v))))
-
-(defmulti machine-eval (fn [machine [mnemonic & ops]] mnemonic))
 
 (defn machine-next
   [machine]
@@ -20,10 +19,6 @@
   [machine addr]
   (get-in machine [:memory addr]))
 
-(defmethod machine-eval :dat
-  [machine [_ & ops]]
-  (machine-next machine))
-
 (defn machine-addr
   [machine [addr-type offset]]
   (let [base (+ (:ptr machine) (parse-integer (str offset)))]
@@ -36,6 +31,12 @@
   (case value-type
     :immediate (parse-integer (str value))
     (:relative :indirect) (machine-get machine (machine-addr machine op))))
+
+(defmulti machine-eval (fn [machine [mnemonic & ops]] mnemonic))
+
+(defmethod machine-eval :dat
+  [machine [_ & ops]]
+  (machine-next machine))
 
 (defmethod machine-eval :add
   [machine [_ op1 op2]]
@@ -60,7 +61,6 @@
   [machine]
   (machine-eval machine (get-in machine [:instructions (:ptr machine)])))
 
-
 (def dwarf
   "DAT 0
   ADD #4 -1
@@ -72,5 +72,5 @@
 
 (def machine
   {:memory       (vec (repeat 8000 0))
-   :instructions (assembler/parse dwarf)
+   :instructions (parser/parse dwarf)
    :ptr          0})
