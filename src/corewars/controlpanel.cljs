@@ -4,17 +4,6 @@
 
 (enable-console-print!)
 
-(defn circle
-  []
-  {:pixi.shape/type :pixi.shape.type/circle
-   :pixi.shape/position [0 20]
-   :pixi.circle/radius 20
-   :pixi.shape/line
-   {:pixi.line/width 4
-    :pixi.line/color 0x22FF11
-    :pixi.line/alpha 0.7}})
-
-
 (defn draw-machine
   [machine]
   (let [nx 100
