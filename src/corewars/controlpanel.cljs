@@ -1,6 +1,7 @@
 (ns corewars.controlpanel
   (:require [impi.core :as impi]
             [corewars.interpreter :as interpreter]
+            [corewars.decoder :as decoder]
             [corewars.examples :as examples]
             [rum.core :as rum]
             [goog.dom :as dom]))
@@ -51,20 +52,33 @@
 (def impi
   {:after-render (fn [state]
                    (draw-machine (js/ReactDOM.findDOMNode (:rum/react-component state))
-                                 @(first (:rum/args state)))                   
+                                 (first (:rum/args state)))                   
                    state)})
 
-(rum/defc frame < rum/reactive impi
+(rum/defc frame < impi
   [machine]
-  (rum/react machine)
   [:div])
+
+(rum/defc debugger
+  [machine]
+  [:div {:style {:max-height "400px" :overflow "scroll"}}
+   (for [[i line]  (map vector (range) (map decoder/field-string (decoder/disassemble (take 10 (drop (:ptr machine)
+                                                                                                     (:memory machine))))))]
+     [:div {:key i} line])])
+
+(rum/defc main < rum/reactive
+  [machine]
+  (let [machine (rum/react machine)]
+    [:div
+     (frame machine)
+     (debugger machine)]))
 
 (defonce animated
   (let [machine (atom examples/machine)]
     (reset! interpreter/*machine-store-hook* (fn [machine addr value]
                                                (update machine :journal conj addr)))
 
-    (rum/mount (frame machine) (dom/getElement "app"))
+    (rum/mount (main machine) (dom/getElement "app"))
 
     (js/requestAnimationFrame
      (fn cb []

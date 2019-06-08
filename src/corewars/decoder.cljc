@@ -1,4 +1,5 @@
-(ns corewars.decoder)
+(ns corewars.decoder
+  (:require [clojure.string :as str]))
 
 (defn decode-sign
   [bits value]
@@ -59,3 +60,21 @@
 (defn disassemble
   [fields]
   (map disassemble-1 fields))
+
+(defn field-string
+  [[mnemonic [op1-type op1-value :as op1] [op2-type op2-value :as op2]]]
+  (str (str/upper-case (name mnemonic))
+       (when op1
+         (str " " (case op1-type
+                    :immediate "#"
+                    :relative  ""
+                    :indirect  "@")
+              op1-value))
+       (when op2
+         (str " " (case op2-type
+                    :immediate "#"
+                    :relative  ""
+                    :indirect  "@")
+              op2-value))))
+
+
