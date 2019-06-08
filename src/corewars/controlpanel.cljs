@@ -57,10 +57,8 @@
     (js/requestAnimationFrame
      (fn cb []
        (try
-         (println (:ptrs @machine) (:journal @machine))
          (draw-machine (swap! machine #(interpreter/machine-step (assoc % :journal nil))))
          (js/requestAnimationFrame cb)
          (catch js/Error e
-           (.log js/console e)))
-       ))))
+           (.log js/console e)))))))
 
