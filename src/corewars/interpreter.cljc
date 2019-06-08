@@ -11,11 +11,13 @@
 
 (defn machine-store
   [machine value addr]
-  (assoc-in machine [:memory addr] value))
+  (let [size (count (:memory machine))]
+    (assoc-in machine [:memory (mod addr size)] value)))
 
 (defn machine-get
   [machine addr]
-  (get-in machine [:memory addr]))
+  (let [size (count (:memory machine))]
+    (get-in machine [:memory (mod addr size)])))
 
 (defn machine-addr
   [machine [addr-type offset]]
@@ -57,11 +59,16 @@
 
 (defn machine-step
   [machine]
-  (machine-eval machine (decoder/disassemble-1 (get-in machine [:memory (:ptr machine)]))))
+  (-> machine
+      (machine-get (:ptr machine))
+      (decoder/disassemble-1)
+      (->> (machine-eval machine))))
 
 (def machine
-  {:memory       (vec (first (partition 4096 4096 (repeat 0) (emitter/assemble (parser/parse examples/dwarf)))))
+  {:memory       (vec (first (partition 4096 4096 (repeat 0) (emitter/assemble (parser/parse examples/imp)))))
    :ptr          0})
+
+#_(last (iterate machine-step machine))
 
 
 
