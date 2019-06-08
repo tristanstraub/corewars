@@ -5,11 +5,6 @@
             [corewars.emitter :as emitter]
             [corewars.decoder :as decoder]))
 
-(defn parse-integer
-  [v]
-  (int #?(:clj (read-string v)
-          :cljs (cljs.reader/read-string v))))
-
 (defn machine-next
   [machine]
   (update machine :ptr (fn [ptr] (mod (inc ptr) (count (:memory machine))))))
@@ -24,7 +19,7 @@
 
 (defn machine-addr
   [machine [addr-type offset]]
-  (let [base (+ (:ptr machine) (parse-integer (str offset)))]
+  (let [base (+ (:ptr machine) offset)]
     (case addr-type
       :relative base
       :indirect (+ base (machine-get machine base)))))
@@ -32,7 +27,7 @@
 (defn machine-load
   [machine [value-type value :as op]]
   (case value-type
-    :immediate (parse-integer (str value))
+    :immediate value
     (:relative :indirect) (machine-get machine (machine-addr machine op))))
 
 (defmulti machine-eval (fn [machine [mnemonic & ops]] mnemonic))
@@ -67,5 +62,6 @@
 (def machine
   {:memory       (vec (first (partition 4096 4096 (repeat 0) (emitter/assemble (parser/parse examples/dwarf)))))
    :ptr          0})
+
 
 
