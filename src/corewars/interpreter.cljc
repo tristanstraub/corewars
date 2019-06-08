@@ -1,5 +1,6 @@
 (ns corewars.interpreter
   (:require [corewars.parser :as parser]
+            [corewars.examples :as examples]
             #?(:cljs [cljs.reader])))
 
 (defn parse-integer
@@ -61,16 +62,7 @@
   [machine]
   (machine-eval machine (get-in machine [:instructions (:ptr machine)])))
 
-(def dwarf
-  "DAT 0
-  ADD #4 -1
-  MOV #3 @-2
-  JMP -2")
-
-(def imp
-  "MOV 0 1")
-
 (def machine
   {:memory       (vec (repeat 8000 0))
-   :instructions (parser/parse dwarf)
+   :instructions (parser/parse examples/dwarf)
    :ptr          0})

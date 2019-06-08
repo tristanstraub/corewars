@@ -52,4 +52,10 @@
   [[mnemonic op-value]]
   (machine-emit-default [mnemonic nil [:immediate op-value]]))
 
+(defmethod machine-emit :jmp
+  [[mnemonic op]]
+  (machine-emit-default [mnemonic nil op]))
 
+(defn pack
+  [instructions]
+  (map machine-emit instructions))

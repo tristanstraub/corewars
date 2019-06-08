@@ -1,11 +1,17 @@
 (ns corewars.decoder)
 
+(defn decode-sign
+  [bits value]
+  (if (= 1 (bit-and 1 (bit-shift-right value (dec bits))))
+    (- (inc (bit-xor value (bit-and -1 (dec (bit-shift-left 1 bits))))))
+    value))
+
 (defn bit-unshift-field
   ([{:keys [instruction field]} bits]
-   {:instruction (conj instruction (bit-and field (dec (bit-shift-left 1 bits))))
-    :field       (bit-shift-right field bits)}))
+   {:instruction (conj instruction (decode-sign 12 (bit-and field (dec (bit-shift-left 1 bits)))))
+    :field       (unsigned-bit-shift-right field bits)}))
 
-(defn unpack
+(defn unpack-1
   [field]
   (-> {:instruction []
        :field       field}
@@ -20,7 +26,7 @@
 
 (defn decode
   [field]
-  (let [[mnemonic op1-type op2-type op1-value op2-value] (unpack field)]
+  (let [[mnemonic op1-type op2-type op1-value op2-value] (unpack-1 field)]
     [(case mnemonic
        0 :dat
        1 :mov
@@ -44,3 +50,7 @@
           2 :indirect
           nil nil)
         op2-value])]))
+
+(defn unpack
+  [fields]
+  (map decode fields))
