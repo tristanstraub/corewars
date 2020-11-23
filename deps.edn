@@ -1,0 +1,10 @@
+{:deps {instaparse                      {:mvn/version "1.4.10"}
+        impi                            {:mvn/version "0.0.10"}
+        rum                             {:mvn/version "0.11.3"}}
+
+ ;; setup some development paths
+ :paths ["src" "target" "resources"]
+
+ :aliases {:dev {:extra-paths ["target"]
+                 :extra-deps  {com.bhauman/figwheel-main {:mvn/version "0.2.3"}
+                               com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}}}}
