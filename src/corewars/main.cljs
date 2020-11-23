@@ -1,12 +1,10 @@
-(ns corewars.controlpanel
+(ns corewars.main
   (:require [impi.core :as impi]
             [corewars.interpreter :as interpreter]
             [corewars.decoder :as decoder]
             [corewars.examples :as examples]
             [rum.core :as rum]
             [goog.dom :as dom]))
-
-(enable-console-print!)
 
 (defn draw-machine
   [el machine]
@@ -52,7 +50,7 @@
 (def impi
   {:after-render (fn [state]
                    (draw-machine (js/ReactDOM.findDOMNode (:rum/react-component state))
-                                 (first (:rum/args state)))                   
+                                 (first (:rum/args state)))
                    state)})
 
 (rum/defc frame < impi
@@ -87,5 +85,3 @@
          (js/requestAnimationFrame cb)
          (catch js/Error e
            (.log js/console e)))))))
-
-
