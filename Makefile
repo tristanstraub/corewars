@@ -1,11 +1,15 @@
 run:
-	clojure -m figwheel.main -b dev -r
+	clojure -A:dev -m figwheel.main -b dev -r
 
+.PHONY: dist
 dist:
 	clojure -A:dev -m figwheel.main --optimizations advanced --build-once dev
 	mkdir -p dist/cljs-out
 	cp resources/public/* dist
 	cp target/public/cljs-out/dev-main.js dist/cljs-out
+
+gh-pages-init:
+	git checkout --orphan gh-pages
 
 gh-pages:
 	# See https://gist.github.com/cobyism/4730490;
